@@ -21,3 +21,8 @@ body {
   font-weight: 800;
   letter-spacing: 0.6px;
 }
+
+/* Utility for hero */
+.hero-title {
+  letter-spacing: 0.8px;
+}
