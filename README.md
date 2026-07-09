@@ -1,39 +1,28 @@
-# FIFA 2026 — Fan Hub
+# FIFA 2026 — Fan Hub (TheSportsDB-only)
 
-This repository is a Next.js + Tailwind starter for a FIFA 2026 fan site. The scaffold includes UI, animations, and serverless API routes that integrate with free sports data providers.
+This repo is now configured to use TheSportsDB v1 as the single upstream provider. TheSportsDB allows using the free demo key `123` by embedding it in the v1 base path — so you do not need to register for an API key to try the app.
 
-Important: to power live scores, fixtures, stadiums, teams and player pages you must configure one (or more) upstream data providers. This project supports the following providers (in order of preference):
+Base URLs
+- v1 Base URL: https://www.thesportsdb.com/api/v1/json
+- v2 Base URL: https://www.thesportsdb.com/api/v2/json
 
-1) API-Football (API-SPORTS)
-   - Best coverage and rich data (fixtures, lineups, events, players, venues)
-   - Free tier available (register at https://www.api-football.com/ or via RapidAPI)
-   - Env var: API_FOOTBALL_KEY (or API_SPORTS_KEY)
-   - Header used: x-apisports-key
-   - Example: the app's /api/scores will call `https://v3.football.api-sports.io/fixtures?date=YYYY-MM-DD`
+Using the free v1 key
+- The free key for v1 is `123`. Example calls used by the project:
+  - https://www.thesportsdb.com/api/v1/json/123/eventsday.php?d=2026-06-15
+  - https://www.thesportsdb.com/api/v1/json/123/lookupteam.php?id=133602
+  - https://www.thesportsdb.com/api/v1/json/123/lookupplayer.php?id=34145937
 
-2) TheSportsDB
-   - Free, community API with team/player/stadium data and event-day lookup
-   - Register for a free API key at https://www.thesportsdb.com
-   - Env var: THE_SPORTS_DB_KEY or NEXT_PUBLIC_SPORTSDB_KEY
-   - Example: `/pages/api/scores` uses `eventsday.php?d=YYYY-MM-DD` when this key is set
-
-Fallback behavior
-- If neither provider is configured, the server endpoints will return a helpful error explaining which env vars to set.
-- For testing you can add `?demo=true` to /api/scores to get local demo data (not intended for production).
-
-Server endpoints included
-- GET /api/scores?date=YYYY-MM-DD -> list of normalized matches (requires API config)
-- GET /api/teams/[id] -> team details (API-Football or TheSportsDB)
-- GET /api/players/[id] -> player details (API-Football or TheSportsDB)
+What I changed
+- All serverless API routes now use TheSportsDB v1 with the free key `123` by default, so you can run and test the app without setting environment variables.
+- If you prefer to use your own TheSportsDB key (recommended for production or higher limits), set THE_SPORTS_DB_KEY in your environment and the routes will use that instead.
+- Removed dependency on API-Football; the app now normalizes responses from TheSportsDB into the frontend shape.
 
 How to run locally
 1. Install dependencies
    npm install
 
-2. Add env vars (example .env.local)
-   API_FOOTBALL_KEY=your_api_football_key_here
+2. Optional .env.local (only if you have your own key)
    THE_SPORTS_DB_KEY=your_thesportsdb_key_here
-   # Optional: ALLOW_DEMO=true to allow demo fallback without query param
 
 3. Run dev server
    npm run dev
@@ -41,12 +30,11 @@ How to run locally
 4. Example calls
    - http://localhost:3000/api/scores
    - http://localhost:3000/api/scores?date=2026-06-15
-   - http://localhost:3000/api/teams/33
-   - http://localhost:3000/api/players/276
+   - http://localhost:3000/api/teams/133602
+   - http://localhost:3000/api/players/34145937
 
 Notes & next steps
-- This project focuses on server-side proxying to keep API keys secret and to normalize multiple provider responses into a single frontend shape.
-- To improve rate limits, add a more persistent caching layer (Redis or Vercel Edge Cache) instead of the in-memory cache in this starter.
-- Replace demo UI content with richer animated player and team pages (examples in /components).
+- The free demo key `123` is intended for development/testing and has community-level limits. For a production site or frequent polling, register for your own key and set THE_SPORTS_DB_KEY.
+- Consider adding caching (Redis/Edge) if you plan to poll frequently to avoid hitting rate limits.
 
 License: MIT
