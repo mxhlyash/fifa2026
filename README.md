@@ -1,40 +1,52 @@
 # FIFA 2026 — Fan Hub
 
-This repository is a starter Vercel-friendly Next.js project for a FIFA 2026 fan site with a squarish design, animations, and mock live data.
+This repository is a Next.js + Tailwind starter for a FIFA 2026 fan site. The scaffold includes UI, animations, and serverless API routes that integrate with free sports data providers.
 
-Features included:
-- Next.js + Tailwind CSS scaffold
-- Mock server API endpoints under /pages/api so the site works out-of-the-box
-- Animated player card using Framer Motion
-- Match list cards, tournament table UI
-- Simple proxy to TheSportsDB if you set NEXT_PUBLIC_SPORTSDB_KEY
-- Vercel deployment notes
+Important: to power live scores, fixtures, stadiums, teams and player pages you must configure one (or more) upstream data providers. This project supports the following providers (in order of preference):
 
-Getting started
+1) API-Football (API-SPORTS)
+   - Best coverage and rich data (fixtures, lineups, events, players, venues)
+   - Free tier available (register at https://www.api-football.com/ or via RapidAPI)
+   - Env var: API_FOOTBALL_KEY (or API_SPORTS_KEY)
+   - Header used: x-apisports-key
+   - Example: the app's /api/scores will call `https://v3.football.api-sports.io/fixtures?date=YYYY-MM-DD`
 
-1. Install:
+2) TheSportsDB
+   - Free, community API with team/player/stadium data and event-day lookup
+   - Register for a free API key at https://www.thesportsdb.com
+   - Env var: THE_SPORTS_DB_KEY or NEXT_PUBLIC_SPORTSDB_KEY
+   - Example: `/pages/api/scores` uses `eventsday.php?d=YYYY-MM-DD` when this key is set
 
+Fallback behavior
+- If neither provider is configured, the server endpoints will return a helpful error explaining which env vars to set.
+- For testing you can add `?demo=true` to /api/scores to get local demo data (not intended for production).
+
+Server endpoints included
+- GET /api/scores?date=YYYY-MM-DD -> list of normalized matches (requires API config)
+- GET /api/teams/[id] -> team details (API-Football or TheSportsDB)
+- GET /api/players/[id] -> player details (API-Football or TheSportsDB)
+
+How to run locally
+1. Install dependencies
    npm install
 
-2. Run locally:
+2. Add env vars (example .env.local)
+   API_FOOTBALL_KEY=your_api_football_key_here
+   THE_SPORTS_DB_KEY=your_thesportsdb_key_here
+   # Optional: ALLOW_DEMO=true to allow demo fallback without query param
 
+3. Run dev server
    npm run dev
 
-3. To enable live data proxy (optional):
+4. Example calls
+   - http://localhost:3000/api/scores
+   - http://localhost:3000/api/scores?date=2026-06-15
+   - http://localhost:3000/api/teams/33
+   - http://localhost:3000/api/players/276
 
-   - Sign up for a free key at TheSportsDB (or any other free sports API).
-   - Add the key in Vercel or a local .env file as NEXT_PUBLIC_SPORTSDB_KEY.
-   - The serverless /api/scores will attempt to proxy live events for today's date and fall back to demo data.
-
-Deploying to Vercel
-
-- Import this repo into Vercel and set environment variables if you want real data.
-- The project is configured to build with Next.js out-of-the-box.
-
-Extending the project
-
-- Add pages/teams/[id].js to show team and player details by calling /api/teams or directly integrating a chosen API.
-- Add WebSocket polling or server-sent events for truly live updates.
-- Replace mock data with real providers (TheSportsDB, ScoreBat, or API-Football).
+Notes & next steps
+- This project focuses on server-side proxying to keep API keys secret and to normalize multiple provider responses into a single frontend shape.
+- To improve rate limits, add a more persistent caching layer (Redis or Vercel Edge Cache) instead of the in-memory cache in this starter.
+- Replace demo UI content with richer animated player and team pages (examples in /components).
 
 License: MIT
